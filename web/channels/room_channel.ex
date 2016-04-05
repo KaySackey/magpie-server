@@ -4,6 +4,7 @@ defmodule Magpie.RoomChannel do
 	require Message
   require Logger
   require Room
+  require Plug.HTML
   alias Magpie.UserSocket
 
   # TODO: http://stackoverflow.com/questions/33934029/how-to-detect-if-a-user-left-a-phoenix-channel-due-to-a-network-disconnect
@@ -112,6 +113,7 @@ defmodule Magpie.RoomChannel do
   Broadcast simple text messages
   """
   def handle_in("simple_message", %{"text" => text } = _payload, socket) do
+  	text = Plug.HTML.html_escape(text)
 		message = %{ Message.simple | username: socket.assigns.username, body: text }
 
 		broadcast_message!(socket, message)
@@ -123,6 +125,7 @@ defmodule Magpie.RoomChannel do
 	Handle basic commands to the server
 	"""
   def handle_in("command", %{"text" => text} = _payload, socket) do
+  		text = Plug.HTML.html_escape(text)
 			socket = RoomActions.handle(text, socket)
 			{:reply, :ok, socket}
   end
